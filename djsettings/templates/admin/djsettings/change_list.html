@@ -1,0 +1,95 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static admin_list %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/changelists.css" %}">
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}">
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+{{ media.css }}
+{% if not actions_on_top and not actions_on_bottom %}
+<style>
+    #changelist table thead th:first-child {width: inherit}
+</style>
+{% endif %}
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+{{ media.js }}
+{% endblock %}
+
+{% block bodyclass %}{{ block.super }} app-{{ opts.app_label }} model-{{ opts.model_name }} change-list{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+    &rsaquo; {{ opts.verbose_name_plural|capfirst }}
+</div>
+{% endblock %}
+{% endif %}
+
+{% block coltype %}flex{% endblock %}
+
+{% block content %}
+<div id="content-main">
+    <div class="module" id="changelist">
+        <form enctype="multipart/form-data" action="" method="post" id="{{ opts.model_name }}_form" novalidate>
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <p class="errornote">
+                {% if form.errors|length == 1 %}
+                    {% trans "Please correct the error below." %}
+                {% else %}
+                    {% trans "Please correct the errors below." %}
+                {% endif %}
+            </p>
+            {{ form.non_field_errors }}
+            {% endif %}
+
+            {% for fieldset in fieldsets %}
+                <fieldset class="module aligned {{ fieldset.classes }}">
+                    {% if fieldset.name %}<h2>{{ fieldset.name }}</h2>{% endif %}
+
+                    {% for line in fieldset %}
+                        <div class="form-row{% if line.fields|length_is:'1' and line.errors %} errors{% endif %}{% if not line.has_visible_field %} hidden{% endif %}{% for field in line %}{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% endfor %}">
+                            {% if line.fields|length_is:'1' %}{{ line.errors }}{% endif %}
+                            {% for field in line %}
+
+                                <div{% if not line.fields|length_is:'1' %} class="fieldBox{% if field.field.name %} field-{{ field.field.name }}{% endif %}{% if not field.is_readonly and field.errors %} errors{% endif %}{% if field.field.is_hidden %} hidden{% endif %}"{% elif field.is_checkbox %} class="checkbox-row"{% endif %}>
+
+                                    {% if not line.fields|length_is:'1' and not field.is_readonly %}{{ field.errors }}{% endif %}
+
+                                    {% if field.is_checkbox %}
+                                        {{ field.field }}{{ field.label_tag }}
+                                    {% else %}
+                                        {{ field.label_tag }}
+                                        {% if field.is_readonly %}
+                                            <div class="readonly">{{ field.contents }}</div>
+                                        {% else %}
+                                            {{ field.field }}
+                                        {% endif %}
+                                    {% endif %}
+
+                                    <div class="help"><strong>Default:</strong> {{ field.field.field.default }}</div>
+
+                                    {% if field.field.help_text %}
+                                        <div class="help">{{ field.field.help_text|safe }}</div>
+                                    {% endif %}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+                </fieldset>
+            {% endfor %}
+
+            <div class="submit-row">
+                <input type="submit" value="{% trans 'Save' %}" class="default" name="_save">
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,4 @@
+include LICENSE
+include README.md
+recursive-include djsettings *.html *.png *.gif *js *.css *jpg *jpeg *svg *py
+recursive-include djsettings/locale django.mo django.po
