@@ -58,7 +58,7 @@ class DjSettingAdmin(admin.ModelAdmin):
 
         fieldsets = (Fieldset(form,
                               name=group._meta.verbose_name,
-                              fields=[setting_name for setting_name in group.settings])
+                              fields=[setting.name for setting in group._meta.settings])
                      for group in djsetting.get_all_setting_groups())
 
         context = dict(

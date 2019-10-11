@@ -10,6 +10,7 @@ class Options:
     def __init__(self, meta):
         self.verbose_name = None
         self.meta = meta
+        self.settings = []
 
     def contribute_to_class(self, cls, name):
         setattr(cls, name, self)
@@ -34,6 +35,9 @@ class Options:
                 raise TypeError(f"'class Meta' got invalid attribute(s): {','.join(meta_attrs)}")
 
         del self.meta
+
+    def add_setting(self, field):
+        self.settings.append(field)
 
     def __repr__(self):
         return f'<Options for {self.object_name}>'

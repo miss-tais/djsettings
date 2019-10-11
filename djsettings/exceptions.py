@@ -16,3 +16,7 @@ class InvalidSettingValue(ValueError):
 
 class InvalidDefaultSettingValue(ValueError):
     """Raise exception when default value for settings key is invalid"""
+
+
+class DefaultSettingValueRequired(ValueError):
+    """Raise exception when default value for settings key is required"""

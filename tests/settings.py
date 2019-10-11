@@ -10,7 +10,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
 
     "djsettings",
-    'tests.test_app'
 ]
 
 
