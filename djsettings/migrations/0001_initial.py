@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
             name='DjSetting',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('name', models.CharField(db_index=True, max_length=255, verbose_name='name')),
+                ('name', models.CharField(db_index=True, max_length=255, unique=True, verbose_name='name')),
                 ('raw_value', models.TextField(blank=True, verbose_name='raw value')),
             ],
             options={

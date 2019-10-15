@@ -6,6 +6,8 @@ from .options import Options
 
 
 class DjSettingsGroupMetaclass(type):
+    """Collect Settings declared in settings group."""
+
     def __new__(cls, name, bases, attrs):
         module = attrs.pop('__module__')
         new_attrs = {'__module__': module}
@@ -33,6 +35,7 @@ class DjSettingsGroupMetaclass(type):
         options = Options(meta)
         options.contribute_to_class(new_class, '_meta')
 
+        # Add settings to class
         for obj_name, obj in new_class._declared_settings.items():
             obj.contribute_to_class(new_class, obj_name)
 
@@ -45,14 +48,7 @@ class DjSettingsGroupMetaclass(type):
 
 
 class DjSettingsGroup(metaclass=DjSettingsGroupMetaclass):
-    def __iter__(self):
-        for name in self._declared_settings:
-            yield self[name]
+    """Group of settings"""
 
-    def __getitem__(self, name):
-        try:
-            field = self._declared_settings[name]
-        except KeyError:
-            available_settings = ', '.join(sorted(s for s in self._declared_settings))
-            raise KeyError(f"Key '{name}' not found in '{self.__class__.__name__}'. Choices are: {available_settings}.")
-        return field
+    def __repr__(self):
+        return f'<{self.__class__.__name__} object>'

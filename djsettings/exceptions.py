@@ -6,6 +6,10 @@ class SettingNotRegistered(Exception):
     """Raise exception when settings key not found in registry"""
 
 
+class SettingsGroupClassNotRegistered(Exception):
+    """Raise exception when settings group class not found in registry"""
+
+
 class SettingCachedValueNotFound(Exception):
     """Raise exception when cached value not found in cache"""
 

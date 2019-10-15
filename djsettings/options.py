@@ -8,8 +8,11 @@ DEFAULT_NAMES = (
 
 class Options:
     def __init__(self, meta):
-        self.verbose_name = None
         self.meta = meta
+
+        self.object_name = None
+        self.verbose_name = None
+
         self.settings = []
 
     def contribute_to_class(self, cls, name):
@@ -42,6 +45,4 @@ class Options:
     def __repr__(self):
         return f'<Options for {self.object_name}>'
 
-    def __str__(self):
-        return f"{self.object_name.lower()}"
 

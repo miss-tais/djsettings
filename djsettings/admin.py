@@ -6,6 +6,7 @@ from django.contrib.admin.options import csrf_protect_m
 from django.template.response import TemplateResponse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.admin.helpers import Fieldset
+from django.core.exceptions import PermissionDenied
 
 from .models import DjSetting
 from .forms import DjSettingsForm
@@ -47,9 +48,16 @@ class DjSettingAdmin(admin.ModelAdmin):
     def _changeform_view(self, request, extra_context):
         opts = self.model._meta
         app_label = opts.app_label
+
+        if not self.has_view_or_change_permission(request):
+            raise PermissionDenied
+
         form = self.change_list_form()
 
         if request.method == 'POST':
+            if not self.has_change_permission(request):
+                raise PermissionDenied
+
             form = self.change_list_form(request.POST, request.FILES)
 
             if form.is_valid():

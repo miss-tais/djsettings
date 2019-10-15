@@ -1,8 +1,7 @@
 from django.db import models
 from django.utils.translation import gettext_lazy as _
-from django.utils.functional import cached_property
 
-from djsettings import djsetting
+from .registries import djsetting
 
 
 class DjSetting(models.Model):
@@ -19,16 +18,16 @@ class DjSetting(models.Model):
         verbose_name = _("Django Setting")
         verbose_name_plural = _("Django Settings")
 
-    def __repr__(self):
-        return f"<{self.__module__}.{self.__class__.__name__}(id={self.pk!r})"
+    def __str__(self):
+        return f"{self.name} setting"
 
     @property
     def value(self):
-        return getattr(djsetting, self.name)
+        value_instance = djsetting.get_setting(self.name)
+        return value_instance.to_python(self.raw_value)
 
     # @value.setter
     # def value(self, value):
-    #     self.raw_value = self.preference.serializer.serialize(value)
-
-
-#TODO: invalidate cache on model save method
+    #     value_instance = djsetting.get_setting(self.name)
+    #     value_instance.validate(value)
+    #     self.raw_value = value_instance.to_db(value)

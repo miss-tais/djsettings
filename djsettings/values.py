@@ -15,7 +15,6 @@ class empty:
 
 
 class ValueDescriptor:
-
     def __init__(self, value):
         self.value = value
 
@@ -35,10 +34,7 @@ class ValueDescriptor:
     def __set__(self, instance, value):
         current_value = self.__get__(instance)
 
-        try:
-            self.value.validate(self.value.prepare_value(value))
-        except ValidationError as e:
-            raise InvalidSettingValue(e)
+        self.value.validate(value)
 
         if value != current_value:
             db_setting = self.value.update_db(name=self.value.name, value=value)
@@ -65,8 +61,8 @@ class BaseValueType:
             raise DefaultSettingValueRequired
 
         try:
-            self.validate(self.prepare_value(default))
-        except ValidationError as e:
+            self.validate(default)
+        except InvalidSettingValue as e:
             raise InvalidDefaultSettingValue(e)
 
         self._default = default
@@ -124,8 +120,14 @@ class BaseValueType:
         return self.form_field_class(**self._get_value_kwargs())
 
     def validate(self, value):
-        self.form_field.validate(value)
-        self.form_field.run_validators(value)
+        value = self.prepare_value(value)
+
+        try:
+            value = self.to_python(value)
+            self.form_field.validate(value)
+            self.form_field.run_validators(value)
+        except (ValidationError, AttributeError, TypeError) as e:
+            raise InvalidSettingValue(e)
 
     def to_python(self, value):
         return self.form_field.to_python(value)
@@ -222,8 +224,12 @@ class ModelChoiceValue(BaseValueType):
 
         super().__init__(**kwargs)
 
+    def contribute_to_class(self, cls, name):
+        super().contribute_to_class(cls, name)
+
         signals.pre_delete.connect(self._delete_related_value,
-                                   sender=self._model)
+                                   sender=self._model,
+                                   dispatch_uid=f'djsettings.values.ModelChoiceValue.{self.name}')
 
     def _delete_related_value(self, instance, **kwargs):
         if self._default == instance:
@@ -244,14 +250,14 @@ class ModelChoiceValue(BaseValueType):
             super().validate(value)
 
     def prepare_value(self, value):
-        if not value:
-            return None
-        return value.pk
+        if hasattr(value, '_meta'):
+            return value.pk
+        return super().prepare_value(value)
 
     def to_db(self, value, **kwargs):
-        if not value:
-            return ''
-        return force_text(value.pk)
+        if hasattr(value, '_meta'):
+            return force_text(value.pk)
+        return super().to_db(value)
 
 
 __all__ = [
